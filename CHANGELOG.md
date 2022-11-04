@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/GeorgeV220/LibraryLoader/compare/v1.1.1...v1.1.2) (2022-11-04)
+
+
+### Bug Fixes
+
+* **build.gradle:** Removed unnecessary relocate/exclude ([90c0cd8](https://github.com/GeorgeV220/LibraryLoader/commit/90c0cd8d9db5f7a36c72bb966cda027213b22672))
+
 ## [1.1.1](https://github.com/GeorgeV220/LibraryLoader/compare/v1.1.0...v1.1.1) (2022-11-04)
 
 
