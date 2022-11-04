@@ -175,6 +175,9 @@ public final class LibraryLoader {
         }
 
         try {
+            if (classLoaderAccess.contains(saveLocation.toURI().toURL())) {
+                throw new RuntimeException("Dependency " + d + " is already in the class path.");
+            }
             classLoaderAccess.add(saveLocation.toURI().toURL());
         } catch (Exception e) {
             throw new RuntimeException("Unable to load '" + saveLocation + "' dependency.", e);
