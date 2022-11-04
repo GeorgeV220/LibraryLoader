@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/GeorgeV220/LibraryLoader/compare/v1.1.0...v1.1.1) (2022-11-04)
+
+
+### Bug Fixes
+
+* **publish.gradle:** Fix GitHub packages URL ([67f46d6](https://github.com/GeorgeV220/LibraryLoader/commit/67f46d6917a4ce47d48b240df564fcd1b6a8fe8a))
+
 # [1.1.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.0.0...v1.1.0) (2022-11-04)
 
 
