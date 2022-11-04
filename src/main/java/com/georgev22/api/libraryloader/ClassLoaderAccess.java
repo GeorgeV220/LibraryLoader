@@ -133,6 +133,18 @@ public class ClassLoaderAccess {
         return unopenedURLs;
     }
 
+    /**
+     * Check if a URL is present to the unopenedURLs or pathURLs.
+     *
+     * @param url URL to check
+     * @return if the URL is present to the unopenedURLs or pathURLs.
+     */
+    public boolean contains(URL url) {
+        if (unopenedURLs.contains(url)) {
+            return true;
+        } else return pathURLs.contains(url);
+    }
+
     private Object fetchField(final Class<?> clazz, final Object object, final String name) throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         if (isUnsafeAvailable()) {
             Field field = clazz.getDeclaredField(name);
