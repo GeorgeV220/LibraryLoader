@@ -72,8 +72,6 @@ dependencies {
 
 shadowJar {
     classifier = ''
-    exclude 'com/cryptomorin/**'
-    relocate 'com.georgev22.api', "${packageName}.api"
 }
 
 tasks.build.dependsOn(shadowJar)
@@ -85,7 +83,7 @@ task testJar(type: Jar, dependsOn: testClasses) {
     manifest {
         attributes 'Manifest-Version': '1.0', 'Implementation-Title': 'xyz', 'Implementation-Version': version, 'Main-Class': 'com.georgev22.api.tests.Tests'
     }
-    from sourceSets.test.output+sourceSets.main.output
+    from sourceSets.test.output + sourceSets.main.output
 }
 
 test {
