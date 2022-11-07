@@ -38,13 +38,16 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MavenLibrary {
 
+    @NotNull
+    String value() default "";
+
     /**
      * The group id of the library
      *
      * @return the group id of the library
      */
     @NotNull
-    String groupId();
+    String groupId() default "";
 
     /**
      * The artifact id of the library
@@ -52,7 +55,7 @@ public @interface MavenLibrary {
      * @return the artifact id of the library
      */
     @NotNull
-    String artifactId();
+    String artifactId() default "";
 
     /**
      * The version of the library
@@ -60,7 +63,7 @@ public @interface MavenLibrary {
      * @return the version of the library
      */
     @NotNull
-    String version();
+    String version() default "";
 
     /**
      * The repo where the library can be obtained from
