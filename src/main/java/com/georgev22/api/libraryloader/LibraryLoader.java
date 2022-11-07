@@ -122,7 +122,16 @@ public final class LibraryLoader {
         MavenLibrary[] libs = clazz.getDeclaredAnnotationsByType(MavenLibrary.class);
 
         for (MavenLibrary lib : libs) {
-            load(lib.groupId(), lib.artifactId(), lib.version(), lib.repo().value());
+            if (
+                    !lib.groupId().equalsIgnoreCase("")
+                            || !lib.artifactId().equalsIgnoreCase("")
+                            || !lib.version().equalsIgnoreCase("")
+            )
+                load(lib.groupId(), lib.artifactId(), lib.version(), lib.repo().value());
+            else {
+                String[] dependency = lib.value().split(":", 4);
+                load(dependency[0], dependency[1], dependency[2], dependency[3]);
+            }
         }
     }
 
@@ -149,7 +158,9 @@ public final class LibraryLoader {
 
         if (!saveLocationDir.exists()) {
             logger.info(String.format("Creating directory for dependency %s:%s:%s from %s", d.groupId(), d.artifactId(), d.version(), d.repoUrl()));
-            saveLocationDir.mkdirs();
+            if (saveLocationDir.mkdirs()) {
+                logger.info(String.format("The directory for dependency %s:%s:%s was successfully created!!", d.groupId(), d.artifactId(), d.version()));
+            }
         }
 
         File saveLocation = new File(saveLocationDir, name + ".jar");
