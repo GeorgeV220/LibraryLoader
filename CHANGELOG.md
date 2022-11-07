@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.1.2...v1.2.0) (2022-11-07)
+
+
+### Features
+
+* **LibraryLoader:** Support for gradle dependency format ([972a207](https://github.com/GeorgeV220/LibraryLoader/commit/972a207af150de9361fab1fc234436b13ef4468e))
+* **MavenLibrary:** Added value to the annotation ([c1c193a](https://github.com/GeorgeV220/LibraryLoader/commit/c1c193aec60b08230de334d18390a9a58f3ffd8a))
+
 ## [1.1.2](https://github.com/GeorgeV220/LibraryLoader/compare/v1.1.1...v1.1.2) (2022-11-04)
 
 
