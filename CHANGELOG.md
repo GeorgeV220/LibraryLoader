@@ -1,3 +1,11 @@
+# [1.3.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.2.0...v1.3.0) (2022-11-10)
+
+
+### Features
+
+* **ClassLoaderAccess:** contains method ([a527a0e](https://github.com/GeorgeV220/LibraryLoader/commit/a527a0e6d004f900a0c10110b90648f577832010))
+* **Exception:** Dependency exceptions ([7f31eb0](https://github.com/GeorgeV220/LibraryLoader/commit/7f31eb0810d37264b8c6d8472e6674c7c9c9a61f))
+
 # [1.2.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.1.2...v1.2.0) (2022-11-07)
 
 
