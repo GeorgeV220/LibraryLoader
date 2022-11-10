@@ -26,6 +26,8 @@
 package com.georgev22.api.libraryloader;
 
 import com.georgev22.api.libraryloader.annotations.MavenLibrary;
+import com.georgev22.api.libraryloader.exceptions.InvalidDependencyException;
+import com.georgev22.api.libraryloader.exceptions.UnknownDependencyException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -97,7 +99,7 @@ public final class LibraryLoader {
     /**
      * Resolves all {@link MavenLibrary} annotations on the Class.
      */
-    public void loadAll() {
+    public void loadAll() throws InvalidDependencyException, UnknownDependencyException {
         if (clazz == null) {
             throw new RuntimeException("Class is null!");
         }
@@ -109,7 +111,7 @@ public final class LibraryLoader {
      *
      * @param object the object to load libraries for.
      */
-    public void loadAll(@NotNull Object object) {
+    public void loadAll(@NotNull Object object) throws InvalidDependencyException, UnknownDependencyException {
         loadAll(object.getClass());
     }
 
@@ -118,7 +120,7 @@ public final class LibraryLoader {
      *
      * @param clazz the class to load libraries for.
      */
-    public <T> void loadAll(@NotNull Class<T> clazz) {
+    public <T> void loadAll(@NotNull Class<T> clazz) throws InvalidDependencyException, UnknownDependencyException {
         MavenLibrary[] libs = clazz.getDeclaredAnnotationsByType(MavenLibrary.class);
 
         for (MavenLibrary lib : libs) {
@@ -135,7 +137,7 @@ public final class LibraryLoader {
         }
     }
 
-    public void load(String groupId, String artifactId, String version, String repoUrl) {
+    public void load(String groupId, String artifactId, String version, String repoUrl) throws InvalidDependencyException, UnknownDependencyException {
         load(new Dependency(groupId, artifactId, version, repoUrl));
     }
 
@@ -144,7 +146,7 @@ public final class LibraryLoader {
      *
      * @param d Dependency object.
      */
-    public void load(@NotNull Dependency d) {
+    public void load(@NotNull Dependency d) throws InvalidDependencyException, UnknownDependencyException {
         if (dependencyList.contains(d)) {
             logger.warning(String.format("Dependency %s:%s:%s is already loaded!", d.groupId(), d.artifactId(), d.version()));
             return;
@@ -175,23 +177,23 @@ public final class LibraryLoader {
                 }
 
             } catch (IOException e) {
-                throw new RuntimeException("Unable to download '" + d + "' dependency.", e);
+                throw new UnknownDependencyException(e, "Unable to download '" + d + "' dependency.");
             }
 
             logger.info("Dependency '" + name + "' successfully downloaded.");
         }
 
         if (!saveLocation.exists()) {
-            throw new RuntimeException("Unable to download '" + d + "' dependency.");
+            throw new UnknownDependencyException("Unable to download '" + d + "' dependency.");
         }
 
         try {
-            if (classLoaderAccess.contains(saveLocation.toURI().toURL())) {
-                throw new RuntimeException("Dependency " + d + " is already in the class path.");
+            if (classLoaderAccess.contains(saveLocation.toURI().toURL()) | classLoaderAccess.contains(d)) {
+                throw new InvalidDependencyException("Dependency " + d + " is already in the class path.");
             }
             classLoaderAccess.add(saveLocation.toURI().toURL());
         } catch (Exception e) {
-            throw new RuntimeException("Unable to load '" + saveLocation + "' dependency.", e);
+            throw new InvalidDependencyException("Unable to load '" + saveLocation + "' dependency.", e);
         }
 
         logger.info("Loaded dependency '" + name + "' successfully.");
