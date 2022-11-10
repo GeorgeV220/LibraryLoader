@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
@@ -143,6 +144,30 @@ public class ClassLoaderAccess {
         if (unopenedURLs.contains(url)) {
             return true;
         } else return pathURLs.contains(url);
+    }
+
+    /**
+     * Check if a dependency is present to the unopenedURLs or pathURLs.
+     *
+     * @param dependency Dependency to check
+     * @return if the dependency is present to the unopenedURLs or pathURLs.
+     */
+    public boolean contains(LibraryLoader.@NotNull Dependency dependency) throws URISyntaxException {
+        return contains(dependency, unopenedURLs) | contains(dependency, pathURLs);
+    }
+
+    private boolean contains(LibraryLoader.@NotNull Dependency dependency, @NotNull Collection<URL> urls) throws URISyntaxException {
+        for (URL url : urls) {
+            String fileName = url.toURI().getPath().substring(url.toURI().getPath().lastIndexOf("\\") + 1);
+            if (fileName.equalsIgnoreCase(dependency.artifactId() + "-" + dependency.version() + ".jar")) {
+                return true;
+            } else if (fileName.replace("-" + dependency.version(), "").equalsIgnoreCase(dependency.artifactId() + ".jar")) {
+                return true;
+            } else if (fileName.contains(dependency.artifactId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Object fetchField(final Class<?> clazz, final Object object, final String name) throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
