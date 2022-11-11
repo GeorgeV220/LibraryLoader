@@ -56,7 +56,7 @@ dependencies {
     compileOnly 'com.google.guava:guava:31.1-jre'
     compileOnly 'org.jetbrains:annotations:23.0.0'
 
-    testImplementation 'com.georgev22:api:6.1.0'
+    testImplementation 'com.georgev22:api:7.2.0'
     testImplementation 'org.jetbrains:annotations:23.0.0'
     testImplementation 'commons-io:commons-io:2.11.0'
     testImplementation 'org.apache.logging.log4j:log4j-core:2.19.0'
