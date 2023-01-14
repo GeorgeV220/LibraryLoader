@@ -99,11 +99,11 @@ public final class LibraryLoader {
     /**
      * Resolves all {@link MavenLibrary} annotations on the Class.
      */
-    public void loadAll() throws InvalidDependencyException, UnknownDependencyException {
+    public void loadAll(boolean pathCheck) throws InvalidDependencyException, UnknownDependencyException {
         if (clazz == null) {
             throw new RuntimeException("Class is null!");
         }
-        loadAll(clazz);
+        loadAll(clazz, pathCheck);
     }
 
     /**
@@ -111,8 +111,8 @@ public final class LibraryLoader {
      *
      * @param object the object to load libraries for.
      */
-    public void loadAll(@NotNull Object object) throws InvalidDependencyException, UnknownDependencyException {
-        loadAll(object.getClass());
+    public void loadAll(@NotNull Object object, boolean pathCheck) throws InvalidDependencyException, UnknownDependencyException {
+        loadAll(object.getClass(), pathCheck);
     }
 
     /**
@@ -120,7 +120,7 @@ public final class LibraryLoader {
      *
      * @param clazz the class to load libraries for.
      */
-    public <T> void loadAll(@NotNull Class<T> clazz) throws InvalidDependencyException, UnknownDependencyException {
+    public <T> void loadAll(@NotNull Class<T> clazz, boolean pathCheck) throws InvalidDependencyException, UnknownDependencyException {
         MavenLibrary[] libs = clazz.getDeclaredAnnotationsByType(MavenLibrary.class);
 
         for (MavenLibrary lib : libs) {
@@ -129,16 +129,16 @@ public final class LibraryLoader {
                             || !lib.artifactId().equalsIgnoreCase("")
                             || !lib.version().equalsIgnoreCase("")
             )
-                load(lib.groupId(), lib.artifactId(), lib.version(), lib.repo().value());
+                load(lib.groupId(), lib.artifactId(), lib.version(), lib.repo().value(), pathCheck);
             else {
                 String[] dependency = lib.value().split(":", 4);
-                load(dependency[0], dependency[1], dependency[2], dependency[3]);
+                load(dependency[0], dependency[1], dependency[2], dependency[3], pathCheck);
             }
         }
     }
 
-    public void load(String groupId, String artifactId, String version, String repoUrl) throws InvalidDependencyException, UnknownDependencyException {
-        load(new Dependency(groupId, artifactId, version, repoUrl));
+    public void load(String groupId, String artifactId, String version, String repoUrl, boolean pathCheck) throws InvalidDependencyException, UnknownDependencyException {
+        load(new Dependency(groupId, artifactId, version, repoUrl), pathCheck);
     }
 
     /**
@@ -146,7 +146,7 @@ public final class LibraryLoader {
      *
      * @param d Dependency object.
      */
-    public void load(@NotNull Dependency d) throws InvalidDependencyException, UnknownDependencyException {
+    public void load(@NotNull Dependency d, boolean pathCheck) throws InvalidDependencyException, UnknownDependencyException {
         if (dependencyList.contains(d)) {
             logger.warning(String.format("Dependency %s:%s:%s is already loaded!", d.groupId(), d.artifactId(), d.version()));
             return;
@@ -188,7 +188,7 @@ public final class LibraryLoader {
         }
 
         try {
-            if (classLoaderAccess.contains(saveLocation.toURI().toURL()) | classLoaderAccess.contains(d)) {
+            if (pathCheck & (classLoaderAccess.contains(saveLocation.toURI().toURL()) | classLoaderAccess.contains(d))) {
                 throw new InvalidDependencyException("Dependency " + d + " is already in the class path.");
             }
             classLoaderAccess.add(saveLocation.toURI().toURL());
