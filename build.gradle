@@ -59,7 +59,7 @@ dependencies {
     testImplementation 'com.georgev22:api:7.3.0'
     testImplementation 'org.jetbrains:annotations:24.0.1'
     testImplementation 'commons-io:commons-io:2.11.0'
-    testImplementation 'org.apache.logging.log4j:log4j-core:2.19.0'
+    testImplementation 'org.apache.logging.log4j:log4j-core:2.20.0'
     testImplementation 'org.yaml:snakeyaml:1.33'
     testImplementation 'commons-lang:commons-lang:2.6'
     testImplementation 'org.jline:jline:3.21.0'
