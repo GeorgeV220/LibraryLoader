@@ -55,11 +55,6 @@ import java.util.regex.Pattern;
 public final class LibraryLoader {
 
     /**
-     * The class being loaded or unloaded with dependencies.
-     */
-    private final Class<?> clazz;
-
-    /**
      * Access to the class loader for loading and unloading libraries.
      */
     private static ClassLoaderAccess classLoaderAccess;
@@ -82,15 +77,13 @@ public final class LibraryLoader {
     /**
      * Constructs a LibraryLoader instance with the specified class, class loader, data folder, and logger.
      *
-     * @param clazz       the class being loaded or unloaded
      * @param classLoader the class loader to use for loading libraries
      * @param dataFolder  the folder where the libraries are stored
      * @param logger      the logger for logging messages
      * @param <T>         the type of the class
      */
-    public <T> LibraryLoader(@NotNull Class<T> clazz, @NotNull URLClassLoader classLoader,
+    public <T> LibraryLoader(@NotNull URLClassLoader classLoader,
                              @NotNull File dataFolder, @NotNull Logger logger) {
-        this.clazz = clazz;
         classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.logger = logger;
         this.dataFolder = dataFolder;
@@ -99,15 +92,13 @@ public final class LibraryLoader {
     /**
      * Constructs a LibraryLoader instance with the specified class, class loader, data folder, and logger.
      *
-     * @param clazz       the class being loaded or unloaded
      * @param classLoader the class loader to use for loading libraries
      * @param dataFolder  the folder where the libraries are stored
      * @param logger      the logger for logging messages
      * @param <T>         the type of the class
      */
-    public <T> LibraryLoader(@NotNull Class<T> clazz, @NotNull ClassLoader classLoader,
+    public <T> LibraryLoader(@NotNull ClassLoader classLoader,
                              @NotNull File dataFolder, @NotNull Logger logger) {
-        this.clazz = clazz;
         classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.logger = logger;
         this.dataFolder = dataFolder;
@@ -117,15 +108,13 @@ public final class LibraryLoader {
      * Constructs a LibraryLoader instance with the specified class, class loader, and data folder.
      * The logger is set to the default logger for the class.
      *
-     * @param clazz       the class being loaded or unloaded
      * @param classLoader the class loader to use for loading libraries
      * @param dataFolder  the folder where the libraries are stored
      * @param <T>         the type of the class
      */
-    public <T> LibraryLoader(@NotNull Class<T> clazz, @NotNull URLClassLoader classLoader, @NotNull File dataFolder) {
-        this.clazz = clazz;
+    public <T> LibraryLoader(@NotNull URLClassLoader classLoader, @NotNull File dataFolder) {
         classLoaderAccess = new ClassLoaderAccess(classLoader);
-        this.logger = Logger.getLogger(clazz.getSimpleName());
+        this.logger = Logger.getLogger(this.getClass().getSimpleName());
         this.dataFolder = dataFolder;
     }
 
@@ -133,15 +122,13 @@ public final class LibraryLoader {
      * Constructs a LibraryLoader instance with the specified class, class loader, and data folder.
      * The logger is set to the default logger for the class.
      *
-     * @param clazz       the class being loaded or unloaded
      * @param classLoader the class loader to use for loading libraries
      * @param dataFolder  the folder where the libraries are stored
      * @param <T>         the type of the class
      */
-    public <T> LibraryLoader(@NotNull Class<T> clazz, @NotNull ClassLoader classLoader, @NotNull File dataFolder) {
-        this.clazz = clazz;
+    public <T> LibraryLoader(@NotNull ClassLoader classLoader, @NotNull File dataFolder) {
         classLoaderAccess = new ClassLoaderAccess(classLoader);
-        this.logger = Logger.getLogger(clazz.getSimpleName());
+        this.logger = Logger.getLogger(this.getClass().getSimpleName());
         this.dataFolder = dataFolder;
     }
 
@@ -150,14 +137,12 @@ public final class LibraryLoader {
      * The class loader is set to the default class loader for the class.
      * The logger is set to the default logger for the class.
      *
-     * @param clazz      the class being loaded or unloaded
      * @param dataFolder the folder where the libraries are stored
      * @param <T>        the type of the class
      */
-    public <T> LibraryLoader(@NotNull Class<T> clazz, @NotNull File dataFolder) {
-        this.clazz = clazz;
-        classLoaderAccess = new ClassLoaderAccess(clazz.getClassLoader());
-        this.logger = Logger.getLogger(clazz.getSimpleName());
+    public <T> LibraryLoader(@NotNull File dataFolder) {
+        classLoaderAccess = new ClassLoaderAccess(this.getClass().getClassLoader());
+        this.logger = Logger.getLogger(this.getClass().getSimpleName());
         this.dataFolder = dataFolder;
     }
 
@@ -344,9 +329,20 @@ public final class LibraryLoader {
         return Collections.unmodifiableList(dependencyList);
     }
 
+    /**
+     * Represents a dependency with the specified group ID, artifact ID, version, and repository URL.
+     */
     @NotNull
     public record Dependency(String groupId, String artifactId, String version, String repoUrl) {
 
+        /**
+         * Constructs a new Dependency with the given group ID, artifact ID, version, and repository URL.
+         *
+         * @param groupId    the group ID of the dependency
+         * @param artifactId the artifact ID of the dependency
+         * @param version    the version of the dependency
+         * @param repoUrl    the URL of the repository where the dependency is hosted
+         */
         public Dependency(String groupId, String artifactId, String version, String repoUrl) {
             this.groupId = notNull("groupId", groupId);
             this.artifactId = notNull("artifactId", artifactId);
@@ -354,6 +350,12 @@ public final class LibraryLoader {
             this.repoUrl = notNull("repoUrl", repoUrl);
         }
 
+        /**
+         * Returns the URL of the dependency based on the group ID, artifact ID, version, and repository URL.
+         *
+         * @return the URL of the dependency
+         * @throws MalformedURLException if the URL is malformed
+         */
         @Contract(" -> new")
         public @NotNull URL url() throws MalformedURLException {
             String repo = this.repoUrl;
@@ -366,6 +368,12 @@ public final class LibraryLoader {
             return new URL(url);
         }
 
+        /**
+         * Checks if this Dependency is equal to another object.
+         *
+         * @param o the object to compare
+         * @return true if the objects are equal, false otherwise
+         */
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -373,6 +381,11 @@ public final class LibraryLoader {
             return groupId.equals(that.groupId) && artifactId.equals(that.artifactId) && version.equals(that.version) && repoUrl.equals(that.repoUrl);
         }
 
+        /**
+         * Returns a string representation of this Dependency.
+         *
+         * @return a string representation of the Dependency
+         */
         @Override
         public @NotNull String toString() {
             return "LibraryLoader.Dependency(" +
@@ -383,15 +396,21 @@ public final class LibraryLoader {
         }
 
         /**
-         * Coverts {@link Dependency#toString()} to {@link Dependency} instance.
+         * Converts a string representation of a Dependency back into a Dependency instance.
          *
-         * @param string String to transform.
-         * @return a new Dependency instance.
+         * @param string the string to transform
+         * @return a new Dependency instance
          */
         @Contract("_ -> new")
         public static @NotNull Dependency fromString(@NotNull String string) {
-            String[] arguments = string.split(Pattern.quote("="));
-            return new Dependency(arguments[0], arguments[1], arguments[2], arguments[3]);
+            String[] arguments = string.split(Pattern.quote(", "));
+
+            String groupId = arguments[0].substring(arguments[0].indexOf("=") + 1);
+            String artifactId = arguments[1].substring(arguments[1].indexOf("=") + 1);
+            String version = arguments[2].substring(arguments[2].indexOf("=") + 1);
+            String repoUrl = arguments[3].substring(arguments[3].indexOf("=") + 1, arguments[3].lastIndexOf(")"));
+
+            return new Dependency(groupId, artifactId, version, repoUrl);
         }
     }
 
@@ -399,21 +418,22 @@ public final class LibraryLoader {
     @Override
     public @NotNull String toString() {
         return "LibraryLoader{" +
-                "clazz=" + clazz +
-                ", dataFolder=" + dataFolder +
+                "dataFolder=" + dataFolder +
+                ", dependencyList=" + dependencyList +
                 '}';
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof LibraryLoader that)) return false;
-        return clazz.equals(that.clazz) && logger.equals(that.logger) && dataFolder.equals(that.dataFolder);
+        if (o == null || getClass() != o.getClass()) return false;
+        LibraryLoader that = (LibraryLoader) o;
+        return Objects.equals(logger, that.logger) && Objects.equals(dataFolder, that.dataFolder) && Objects.equals(getDependencyList(), that.getDependencyList());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(clazz, logger, dataFolder);
+        return Objects.hash(logger, dataFolder, getDependencyList());
     }
 
     /**
