@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.4.0...v1.5.0) (2023-06-08)
+
+
+### Features
+
+* unload methods and other code improvements ([7439fae](https://github.com/GeorgeV220/LibraryLoader/commit/7439fae6c447e71035d73fddbe55bf4f9f5d540a))
+
 # [1.4.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.3.0...v1.4.0) (2023-01-14)
 
 
