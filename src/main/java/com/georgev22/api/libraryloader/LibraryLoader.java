@@ -30,7 +30,7 @@ import com.georgev22.api.libraryloader.exceptions.InvalidDependencyException;
 import com.georgev22.api.libraryloader.exceptions.UnknownDependencyException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +40,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
@@ -47,34 +48,80 @@ import java.util.regex.Pattern;
 
 
 /**
- * Resolves {@link MavenLibrary} annotations for a class, and loads the dependency
- * into the given ClassLoader.
+ * The LibraryLoader class is responsible for dynamically loading and unloading libraries or dependencies at runtime.
+ * It provides methods to load dependencies from Maven repositories or local paths, as well as unload them.
+ * The class uses a specified class loader to load the libraries and keeps track of the loaded dependencies.
  */
-@NotNull
 public final class LibraryLoader {
 
+    /**
+     * The class being loaded or unloaded with dependencies.
+     */
     private final Class<?> clazz;
+
+    /**
+     * Access to the class loader for loading and unloading libraries.
+     */
     private static ClassLoaderAccess classLoaderAccess;
+
+    /**
+     * Logger for logging messages during library loading and unloading.
+     */
     private final Logger logger;
 
+    /**
+     * The folder where the libraries are stored.
+     */
     private final File dataFolder;
 
+    /**
+     * List of loaded dependencies.
+     */
     private final List<Dependency> dependencyList = new ArrayList<>();
 
-    public <T> LibraryLoader(@NotNull Class<T> clazz, @NotNull URLClassLoader classLoader, @NotNull File dataFolder, @NotNull Logger logger) {
+    /**
+     * Constructs a LibraryLoader instance with the specified class, class loader, data folder, and logger.
+     *
+     * @param clazz       the class being loaded or unloaded
+     * @param classLoader the class loader to use for loading libraries
+     * @param dataFolder  the folder where the libraries are stored
+     * @param logger      the logger for logging messages
+     * @param <T>         the type of the class
+     */
+    public <T> LibraryLoader(@NotNull Class<T> clazz, @NotNull URLClassLoader classLoader,
+                             @NotNull File dataFolder, @NotNull Logger logger) {
         this.clazz = clazz;
         classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.logger = logger;
         this.dataFolder = dataFolder;
     }
 
-    public <T> LibraryLoader(@NotNull Class<T> clazz, @NotNull ClassLoader classLoader, @NotNull File dataFolder, @NotNull Logger logger) {
+    /**
+     * Constructs a LibraryLoader instance with the specified class, class loader, data folder, and logger.
+     *
+     * @param clazz       the class being loaded or unloaded
+     * @param classLoader the class loader to use for loading libraries
+     * @param dataFolder  the folder where the libraries are stored
+     * @param logger      the logger for logging messages
+     * @param <T>         the type of the class
+     */
+    public <T> LibraryLoader(@NotNull Class<T> clazz, @NotNull ClassLoader classLoader,
+                             @NotNull File dataFolder, @NotNull Logger logger) {
         this.clazz = clazz;
         classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.logger = logger;
         this.dataFolder = dataFolder;
     }
 
+    /**
+     * Constructs a LibraryLoader instance with the specified class, class loader, and data folder.
+     * The logger is set to the default logger for the class.
+     *
+     * @param clazz       the class being loaded or unloaded
+     * @param classLoader the class loader to use for loading libraries
+     * @param dataFolder  the folder where the libraries are stored
+     * @param <T>         the type of the class
+     */
     public <T> LibraryLoader(@NotNull Class<T> clazz, @NotNull URLClassLoader classLoader, @NotNull File dataFolder) {
         this.clazz = clazz;
         classLoaderAccess = new ClassLoaderAccess(classLoader);
@@ -82,6 +129,15 @@ public final class LibraryLoader {
         this.dataFolder = dataFolder;
     }
 
+    /**
+     * Constructs a LibraryLoader instance with the specified class, class loader, and data folder.
+     * The logger is set to the default logger for the class.
+     *
+     * @param clazz       the class being loaded or unloaded
+     * @param classLoader the class loader to use for loading libraries
+     * @param dataFolder  the folder where the libraries are stored
+     * @param <T>         the type of the class
+     */
     public <T> LibraryLoader(@NotNull Class<T> clazz, @NotNull ClassLoader classLoader, @NotNull File dataFolder) {
         this.clazz = clazz;
         classLoaderAccess = new ClassLoaderAccess(classLoader);
@@ -89,6 +145,15 @@ public final class LibraryLoader {
         this.dataFolder = dataFolder;
     }
 
+    /**
+     * Constructs a LibraryLoader instance with the specified class and data folder.
+     * The class loader is set to the default class loader for the class.
+     * The logger is set to the default logger for the class.
+     *
+     * @param clazz      the class being loaded or unloaded
+     * @param dataFolder the folder where the libraries are stored
+     * @param <T>        the type of the class
+     */
     public <T> LibraryLoader(@NotNull Class<T> clazz, @NotNull File dataFolder) {
         this.clazz = clazz;
         classLoaderAccess = new ClassLoaderAccess(clazz.getClassLoader());
@@ -97,37 +162,34 @@ public final class LibraryLoader {
     }
 
     /**
-     * Resolves all {@link MavenLibrary} annotations on the Class.
-     */
-    public void loadAll(boolean pathCheck) throws InvalidDependencyException, UnknownDependencyException {
-        if (clazz == null) {
-            throw new RuntimeException("Class is null!");
-        }
-        loadAll(clazz, pathCheck);
-    }
-
-    /**
-     * Resolves all {@link MavenLibrary} annotations on the given object.
+     * Loads all dependencies specified by MavenLibrary annotations in the object's class.
      *
-     * @param object the object to load libraries for.
+     * @param object    the object whose class's dependencies should be loaded
+     * @param pathCheck flag indicating whether to check if the dependency is already in the class path
+     * @throws InvalidDependencyException if the dependency is already loaded or in the class path
+     * @throws UnknownDependencyException if the dependency cannot be downloaded or loaded
      */
     public void loadAll(@NotNull Object object, boolean pathCheck) throws InvalidDependencyException, UnknownDependencyException {
         loadAll(object.getClass(), pathCheck);
     }
 
     /**
-     * Resolves all {@link MavenLibrary} annotations on the given class.
+     * Loads all dependencies specified by MavenLibrary annotations in the specified class.
      *
-     * @param clazz the class to load libraries for.
+     * @param clazz     the class whose dependencies should be loaded
+     * @param pathCheck flag indicating whether to check if the dependency is already in the class path
+     * @param <T>       the type of the class
+     * @throws InvalidDependencyException if the dependency is already loaded or in the class path
+     * @throws UnknownDependencyException if the dependency cannot be downloaded or loaded
      */
     public <T> void loadAll(@NotNull Class<T> clazz, boolean pathCheck) throws InvalidDependencyException, UnknownDependencyException {
         MavenLibrary[] libs = clazz.getDeclaredAnnotationsByType(MavenLibrary.class);
 
         for (MavenLibrary lib : libs) {
             if (
-                    !lib.groupId().equalsIgnoreCase("")
-                            || !lib.artifactId().equalsIgnoreCase("")
-                            || !lib.version().equalsIgnoreCase("")
+                    !lib.groupId().equalsIgnoreCase("") ||
+                            !lib.artifactId().equalsIgnoreCase("") ||
+                            !lib.version().equalsIgnoreCase("")
             )
                 load(lib.groupId(), lib.artifactId(), lib.version(), lib.repo().value(), pathCheck);
             else {
@@ -137,14 +199,28 @@ public final class LibraryLoader {
         }
     }
 
+    /**
+     * Loads a dependency with the specified group ID, artifact ID, version, and repository URL.
+     *
+     * @param groupId    the group ID of the dependency
+     * @param artifactId the artifact ID of the dependency
+     * @param version    the version of the dependency
+     * @param repoUrl    the URL of the repository where the dependency is hosted
+     * @param pathCheck  flag indicating whether to check if the dependency is already in the class path
+     * @throws InvalidDependencyException if the dependency is already loaded or in the class path
+     * @throws UnknownDependencyException if the dependency cannot be downloaded or loaded
+     */
     public void load(String groupId, String artifactId, String version, String repoUrl, boolean pathCheck) throws InvalidDependencyException, UnknownDependencyException {
         load(new Dependency(groupId, artifactId, version, repoUrl), pathCheck);
     }
 
     /**
-     * Load a dependency to the given ClassLoader
+     * Loads a dependency specified by the Dependency object.
      *
-     * @param d Dependency object.
+     * @param d         the dependency to load
+     * @param pathCheck flag indicating whether to check if the dependency is already in the class path
+     * @throws InvalidDependencyException if the dependency is already loaded or in the class path
+     * @throws UnknownDependencyException if the dependency cannot be downloaded or loaded
      */
     public void load(@NotNull Dependency d, boolean pathCheck) throws InvalidDependencyException, UnknownDependencyException {
         if (dependencyList.contains(d)) {
@@ -200,18 +276,72 @@ public final class LibraryLoader {
         dependencyList.add(d);
     }
 
-    @NotNull
-    private File getLibFolder() {
-        File libs = new File(dataFolder, "libraries");
-        if (libs.mkdirs()) {
-            logger.info("libraries folder created!");
+    /**
+     * Unloads all loaded dependencies.
+     *
+     * @throws InvalidDependencyException if the dependency is not loaded or cannot be unloaded
+     */
+    public void unloadAll() throws InvalidDependencyException {
+        for (Dependency d : dependencyList) {
+            unload(d);
         }
-        return libs;
     }
 
-    @Nullable
-    public static ClassLoaderAccess getURLClassLoaderAccess() {
-        return classLoaderAccess;
+    /**
+     * Unloads a specific dependency.
+     *
+     * @param d the dependency to unload
+     * @throws InvalidDependencyException if the dependency is not loaded or cannot be unloaded
+     */
+    public void unload(Dependency d) throws InvalidDependencyException {
+        if (!dependencyList.contains(d)) {
+            logger.warning(String.format("Dependency %s:%s:%s is not loaded!", d.groupId(), d.artifactId(), d.version()));
+            return;
+        }
+
+        logger.info(String.format("Unloading dependency %s:%s:%s", d.groupId(), d.artifactId(), d.version()));
+
+
+        String name = d.artifactId() + "-" + d.version();
+
+        File saveLocationDir = new File(getLibFolder(), d.groupId().replace(".", File.separator) + File.separator + d.artifactId().replace(".", File.separator) + File.separator + d.version());
+
+        if (!saveLocationDir.exists()) {
+            throw new InvalidDependencyException(String.format("The directory for dependency %s:%s:%s does not exists!!", d.groupId(), d.artifactId(), d.version()));
+        }
+
+        File saveLocation = new File(saveLocationDir, name + ".jar");
+        if (!saveLocation.exists()) {
+            throw new InvalidDependencyException("Unable to unload '" + d + "' dependency.");
+        }
+
+        try {
+            classLoaderAccess.remove(saveLocation.toURI().toURL());
+        } catch (Exception e) {
+            throw new InvalidDependencyException("Unable to unload dependency " + d, e);
+        }
+
+        logger.info(String.format("Unloaded dependency %s:%s:%s successfully", d.groupId(), d.artifactId(), d.version()));
+        dependencyList.remove(d);
+    }
+
+    /**
+     * Returns the folder where the libraries are stored.
+     *
+     * @return the library folder
+     */
+    public File getLibFolder() {
+        return dataFolder;
+    }
+
+    /**
+     * Returns the list of loaded dependencies.
+     *
+     * @return the list of loaded dependencies
+     */
+    @Contract(pure = true)
+    public @NotNull @UnmodifiableView List<Dependency> getDependencyList() {
+        return Collections.unmodifiableList(dependencyList);
     }
 
     @NotNull
