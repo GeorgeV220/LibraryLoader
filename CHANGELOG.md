@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.5.1...v1.6.0) (2023-06-11)
+
+
+### Features
+
+* Improve getLibFolder() method to create libraries folder if it does not exist ([9373708](https://github.com/GeorgeV220/LibraryLoader/commit/93737089a0695698a277dd02e2babd7428398a13))
+
 ## [1.5.1](https://github.com/GeorgeV220/LibraryLoader/compare/v1.5.0...v1.5.1) (2023-06-08)
 
 
