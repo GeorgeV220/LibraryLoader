@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/GeorgeV220/LibraryLoader/compare/v1.6.0...v1.6.1) (2023-06-11)
+
+
+### Bug Fixes
+
+* Fixed ConcurrentModificationException ([7dc98f9](https://github.com/GeorgeV220/LibraryLoader/commit/7dc98f98b8d7303825daa952a225ea23bb8174a8))
+
 # [1.6.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.5.1...v1.6.0) (2023-06-11)
 
 
