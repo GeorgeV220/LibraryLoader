@@ -267,7 +267,8 @@ public final class LibraryLoader {
      * @throws InvalidDependencyException if the dependency is not loaded or cannot be unloaded
      */
     public void unloadAll() throws InvalidDependencyException {
-        for (Dependency d : dependencyList) {
+        List<Dependency> dependencies = new ArrayList<>(dependencyList);
+        for (Dependency d : dependencies) {
             unload(d);
         }
     }
