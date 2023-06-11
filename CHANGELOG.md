@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/GeorgeV220/LibraryLoader/compare/v1.5.0...v1.5.1) (2023-06-08)
+
+
+### Bug Fixes
+
+* Remove unused field 'clazz' from LibraryLoader class ([c6a47e3](https://github.com/GeorgeV220/LibraryLoader/commit/c6a47e3847334de3533f7a9b16d4c6e21aec2fb9))
+
 # [1.5.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.4.0...v1.5.0) (2023-06-08)
 
 
