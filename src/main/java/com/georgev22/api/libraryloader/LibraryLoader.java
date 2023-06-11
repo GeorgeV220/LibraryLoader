@@ -315,8 +315,12 @@ public final class LibraryLoader {
      *
      * @return the library folder
      */
-    public File getLibFolder() {
-        return dataFolder;
+    public @NotNull File getLibFolder() {
+        File libs = new File(dataFolder, "libraries");
+        if (libs.mkdirs()) {
+            logger.info("libraries folder created!");
+        }
+        return libs;
     }
 
     /**
