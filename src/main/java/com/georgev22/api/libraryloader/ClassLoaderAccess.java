@@ -159,11 +159,11 @@ public class ClassLoaderAccess {
     private boolean contains(LibraryLoader.@NotNull Dependency dependency, @NotNull Collection<URL> urls) throws URISyntaxException {
         for (URL url : urls) {
             String fileName = url.toURI().getPath().substring(url.toURI().getPath().lastIndexOf("\\") + 1);
-            if (fileName.equalsIgnoreCase(dependency.artifactId() + "-" + dependency.version() + ".jar")) {
+            if (fileName.equalsIgnoreCase(dependency.artifactId + "-" + dependency.version + ".jar")) {
                 return true;
-            } else if (fileName.replace("-" + dependency.version(), "").equalsIgnoreCase(dependency.artifactId() + ".jar")) {
+            } else if (fileName.replace("-" + dependency.version, "").equalsIgnoreCase(dependency.artifactId + ".jar")) {
                 return true;
-            } else if (fileName.contains(dependency.artifactId())) {
+            } else if (fileName.contains(dependency.artifactId)) {
                 return true;
             }
         }
@@ -202,7 +202,7 @@ public class ClassLoaderAccess {
         return "ClassLoaderAccess{" +
                 "unopenedURLs=" + unopenedURLs +
                 ", pathURLs=" + pathURLs +
-                ", classLoader=" + classLoader.getClass().getPackage().getName() + "." + classLoader.getName() +
+                ", classLoader=" + classLoader.getClass().getPackage().getName() + "." + classLoader.getClass().getName() +
                 '}';
     }
 }
