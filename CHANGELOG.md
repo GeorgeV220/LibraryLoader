@@ -1,3 +1,11 @@
+# [1.8.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.7.0...v1.8.0) (2024-01-29)
+
+
+### Features
+
+* **ClassLoaderAccess:** add registerLogger method ([4022309](https://github.com/GeorgeV220/LibraryLoader/commit/4022309585fab90ff95db6da2d61899d99ff16ba))
+* **LibraryLoader:** Register logger for ClassLoaderAccess ([70783aa](https://github.com/GeorgeV220/LibraryLoader/commit/70783aac97aeb70d0b7c4fd93241a087b429425b))
+
 # [1.7.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.6.1...v1.7.0) (2024-01-29)
 
 
