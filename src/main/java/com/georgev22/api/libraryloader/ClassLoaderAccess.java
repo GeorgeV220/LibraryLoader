@@ -9,6 +9,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Provides access to {@link ClassLoader} to add URLs on runtime.
@@ -22,6 +24,8 @@ public class ClassLoaderAccess {
     private final Collection<URL> pathURLs;
 
     private final ClassLoader classLoader;
+
+    private Logger logger = null;
 
     private static volatile Object theUnsafe;
 
@@ -50,6 +54,7 @@ public class ClassLoaderAccess {
      *
      * @param classLoader the class loader
      */
+    @SuppressWarnings({"unchecked", "CallToPrintStackTrace"})
     public ClassLoaderAccess(URLClassLoader classLoader) {
         this.classLoader = classLoader;
         Collection<URL> unopenedURLs;
@@ -66,8 +71,13 @@ public class ClassLoaderAccess {
             } catch (Throwable e1) {
                 unopenedURLs = null;
                 pathURLs = null;
-                e.printStackTrace();
-                e1.printStackTrace();
+                if (this.logger != null) {
+                    this.logger.log(Level.SEVERE, "Failed to get unopenedUrls and pathUrls from " + this.classLoader.getClass().getPackage().getName() + "." + this.classLoader.getClass().getName(), e);
+                    this.logger.log(Level.SEVERE, "Failed to get unopenedUrls and pathUrls from " + this.classLoader.getClass().getPackage().getName() + "." + this.classLoader.getClass().getName(), e1);
+                } else {
+                    e.printStackTrace();
+                    e1.printStackTrace();
+                }
             }
         }
         this.unopenedURLs = unopenedURLs;
@@ -79,6 +89,7 @@ public class ClassLoaderAccess {
      *
      * @param classLoader the class loader
      */
+    @SuppressWarnings({"unchecked", "CallToPrintStackTrace"})
     public ClassLoaderAccess(ClassLoader classLoader) {
         this.classLoader = classLoader;
         Collection<URL> unopenedURLs;
@@ -95,8 +106,13 @@ public class ClassLoaderAccess {
             } catch (Throwable e1) {
                 unopenedURLs = null;
                 pathURLs = null;
-                e.printStackTrace();
-                e1.printStackTrace();
+                if (this.logger != null) {
+                    this.logger.log(Level.SEVERE, "Failed to get unopenedUrls and pathUrls from " + this.classLoader.getClass().getPackage().getName() + "." + this.classLoader.getClass().getName(), e);
+                    this.logger.log(Level.SEVERE, "Failed to get unopenedUrls and pathUrls from " + this.classLoader.getClass().getPackage().getName() + "." + this.classLoader.getClass().getName(), e1);
+                } else {
+                    e.printStackTrace();
+                    e1.printStackTrace();
+                }
             }
         }
         this.unopenedURLs = unopenedURLs;
@@ -154,6 +170,15 @@ public class ClassLoaderAccess {
      */
     public boolean contains(LibraryLoader.@NotNull Dependency dependency) throws URISyntaxException {
         return contains(dependency, unopenedURLs) | contains(dependency, pathURLs);
+    }
+
+    /**
+     * Set the logger for this class.
+     *
+     * @param logger the logger to be set
+     */
+    public void registerLogger(Logger logger) {
+        this.logger = logger;
     }
 
     private boolean contains(LibraryLoader.@NotNull Dependency dependency, @NotNull Collection<URL> urls) throws URISyntaxException {
