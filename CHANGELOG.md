@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.8.0...v1.9.0) (2024-01-29)
+
+
+### Features
+
+* **LibraryLoader:** Add support to relocate dependencies in order to prevent conflicts ([2799777](https://github.com/GeorgeV220/LibraryLoader/commit/2799777a512c065856bbd363ede1fe24931e9ae0))
+
 # [1.8.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.7.0...v1.8.0) (2024-01-29)
 
 
