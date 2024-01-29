@@ -28,6 +28,8 @@ package com.georgev22.api.libraryloader;
 import com.georgev22.api.libraryloader.annotations.MavenLibrary;
 import com.georgev22.api.libraryloader.exceptions.InvalidDependencyException;
 import com.georgev22.api.libraryloader.exceptions.UnknownDependencyException;
+import me.lucko.jarrelocator.JarRelocator;
+import me.lucko.jarrelocator.Relocation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -39,6 +41,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -205,6 +209,20 @@ public final class LibraryLoader {
     }
 
     /**
+     * Loads a list of dependencies with the specified path check.
+     *
+     * @param dependencies the list of dependencies to load
+     * @param pathCheck    flag indicating whether to check if the dependencies are already in the class path
+     * @throws InvalidDependencyException if a dependency is already loaded or in the class path
+     * @throws UnknownDependencyException if a dependency cannot be downloaded or loaded
+     */
+    public void load(@NotNull List<Dependency> dependencies, boolean pathCheck) throws InvalidDependencyException, UnknownDependencyException {
+        for (Dependency d : dependencies) {
+            load(d, pathCheck);
+        }
+    }
+
+    /**
      * Loads a dependency specified by the Dependency object.
      *
      * @param d         the dependency to load
@@ -238,8 +256,24 @@ public final class LibraryLoader {
                 logger.info("Dependency '" + name + "' does not exist in the libraries folder. Attempting to download...");
                 URL url = d.url();
 
+                RelocatedDependency relocatedDependency = d instanceof RelocatedDependency ? (RelocatedDependency) d : null;
+
                 try (InputStream is = url.openStream()) {
-                    Files.copy(is, saveLocation.toPath());
+                    if (relocatedDependency != null) {
+                        Path tempFilePath = Files.createTempFile(relocatedDependency.artifactId + "-" + relocatedDependency.version, ".tmp");
+
+                        Files.copy(is, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+                        JarRelocator relocator = new JarRelocator(tempFilePath.toFile(), saveLocation, relocatedDependency.getRelocations());
+
+                        try {
+                            relocator.run();
+                        } catch (IOException e) {
+                            throw new UnknownDependencyException(e, "Unable to relocate" + d + "' dependency.");
+                        }
+                    } else {
+                        Files.copy(is, saveLocation.toPath());
+                    }
                 }
 
             } catch (IOException e) {
@@ -427,6 +461,43 @@ public final class LibraryLoader {
             String repoUrl = arguments[3].substring(arguments[3].indexOf("=") + 1, arguments[3].lastIndexOf(")"));
 
             return new Dependency(groupId, artifactId, version, repoUrl);
+        }
+    }
+
+    /**
+     * Represents a relocated dependency with the specified group ID, artifact ID, version, repository URL,
+     * and a list of relocations for class relocation during loading.
+     */
+    @NotNull
+    public static class RelocatedDependency extends Dependency {
+
+        /**
+         * The list of relocations for class relocation during loading.
+         */
+        private final List<Relocation> relocations;
+
+        /**
+         * Constructs a new RelocatedDependency with the given group ID, artifact ID, version,
+         * repository URL, and a list of relocations for class relocation.
+         *
+         * @param groupId     the group ID of the dependency
+         * @param artifactId  the artifact ID of the dependency
+         * @param version     the version of the dependency
+         * @param repoUrl     the URL of the repository where the dependency is hosted
+         * @param relocations the list of relocations for class relocation
+         */
+        public RelocatedDependency(String groupId, String artifactId, String version, String repoUrl, List<Relocation> relocations) {
+            super(groupId, artifactId, version, repoUrl);
+            this.relocations = notNull("relocations", relocations);
+        }
+
+        /**
+         * Returns the list of relocations for class relocation during loading.
+         *
+         * @return the list of relocations
+         */
+        public List<Relocation> getRelocations() {
+            return relocations;
         }
     }
 
