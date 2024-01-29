@@ -23,13 +23,6 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 group project.property("group")
 
-compileJava {
-    options.encoding = 'UTF-8'
-    options.compilerArgs += ["-parameters"]
-    options.fork = true
-    options.forkOptions.executable = 'javac'
-}
-
 archivesBaseName = project.property("pluginName")
 
 repositories {
@@ -44,6 +37,10 @@ dependencies {
     compileOnly 'org.apache.commons:commons-lang3:3.12.0'
     compileOnly 'com.google.guava:guava:33.0.0-jre'
     compileOnly 'org.jetbrains:annotations:24.0.1'
+
+    implementation 'me.lucko:jar-relocator:1.7'
+    implementation 'org.ow2.asm:asm:9.6'
+    implementation 'org.ow2.asm:asm-commons:9.6'
 
     testImplementation 'com.georgev22:api:7.3.0'
     testImplementation 'org.jetbrains:annotations:24.0.1'
@@ -61,6 +58,8 @@ dependencies {
 
 shadowJar {
     archiveClassifier.set('')
+    relocate 'me.lucko.jarrelocator', 'com.georgev22.api.libraryloader.relocator'
+    relocate 'org.objectweb.asm', 'com.georgev22.api.libraryloader.asm'
 }
 
 tasks.build.dependsOn(shadowJar)
