@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.6.1...v1.7.0) (2024-01-29)
+
+
+### Features
+
+* **build:** Downgrade to Java 8 ([68ee816](https://github.com/GeorgeV220/LibraryLoader/commit/68ee8168d6fdb3d5037b964cb2e5155fa21af019))
+
 ## [1.6.1](https://github.com/GeorgeV220/LibraryLoader/compare/v1.6.0...v1.6.1) (2023-06-11)
 
 
