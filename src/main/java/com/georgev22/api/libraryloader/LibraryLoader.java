@@ -85,6 +85,7 @@ public final class LibraryLoader {
     public <T> LibraryLoader(@NotNull URLClassLoader classLoader,
                              @NotNull File dataFolder, @NotNull Logger logger) {
         this.classLoaderAccess = new ClassLoaderAccess(classLoader);
+        this.classLoaderAccess.registerLogger(logger);
         this.logger = logger;
         this.dataFolder = dataFolder;
     }
@@ -100,6 +101,7 @@ public final class LibraryLoader {
     public <T> LibraryLoader(@NotNull ClassLoader classLoader,
                              @NotNull File dataFolder, @NotNull Logger logger) {
         this.classLoaderAccess = new ClassLoaderAccess(classLoader);
+        this.classLoaderAccess.registerLogger(logger);
         this.logger = logger;
         this.dataFolder = dataFolder;
     }
@@ -115,6 +117,7 @@ public final class LibraryLoader {
     public <T> LibraryLoader(@NotNull URLClassLoader classLoader, @NotNull File dataFolder) {
         this.classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.logger = Logger.getLogger(this.getClass().getSimpleName());
+        this.classLoaderAccess.registerLogger(this.logger);
         this.dataFolder = dataFolder;
     }
 
@@ -129,6 +132,7 @@ public final class LibraryLoader {
     public <T> LibraryLoader(@NotNull ClassLoader classLoader, @NotNull File dataFolder) {
         this.classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.logger = Logger.getLogger(this.getClass().getSimpleName());
+        this.classLoaderAccess.registerLogger(this.logger);
         this.dataFolder = dataFolder;
     }
 
@@ -143,6 +147,7 @@ public final class LibraryLoader {
     public <T> LibraryLoader(@NotNull File dataFolder) {
         this.classLoaderAccess = new ClassLoaderAccess(this.getClass().getClassLoader());
         this.logger = Logger.getLogger(this.getClass().getSimpleName());
+        this.classLoaderAccess.registerLogger(this.logger);
         this.dataFolder = dataFolder;
     }
 
