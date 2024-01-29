@@ -57,7 +57,7 @@ public final class LibraryLoader {
     /**
      * Access to the class loader for loading and unloading libraries.
      */
-    private static ClassLoaderAccess classLoaderAccess;
+    private final ClassLoaderAccess classLoaderAccess;
 
     /**
      * Logger for logging messages during library loading and unloading.
@@ -84,7 +84,7 @@ public final class LibraryLoader {
      */
     public <T> LibraryLoader(@NotNull URLClassLoader classLoader,
                              @NotNull File dataFolder, @NotNull Logger logger) {
-        classLoaderAccess = new ClassLoaderAccess(classLoader);
+        this.classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.logger = logger;
         this.dataFolder = dataFolder;
     }
@@ -99,7 +99,7 @@ public final class LibraryLoader {
      */
     public <T> LibraryLoader(@NotNull ClassLoader classLoader,
                              @NotNull File dataFolder, @NotNull Logger logger) {
-        classLoaderAccess = new ClassLoaderAccess(classLoader);
+        this.classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.logger = logger;
         this.dataFolder = dataFolder;
     }
@@ -113,7 +113,7 @@ public final class LibraryLoader {
      * @param <T>         the type of the class
      */
     public <T> LibraryLoader(@NotNull URLClassLoader classLoader, @NotNull File dataFolder) {
-        classLoaderAccess = new ClassLoaderAccess(classLoader);
+        this.classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.logger = Logger.getLogger(this.getClass().getSimpleName());
         this.dataFolder = dataFolder;
     }
@@ -127,7 +127,7 @@ public final class LibraryLoader {
      * @param <T>         the type of the class
      */
     public <T> LibraryLoader(@NotNull ClassLoader classLoader, @NotNull File dataFolder) {
-        classLoaderAccess = new ClassLoaderAccess(classLoader);
+        this.classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.logger = Logger.getLogger(this.getClass().getSimpleName());
         this.dataFolder = dataFolder;
     }
@@ -141,7 +141,7 @@ public final class LibraryLoader {
      * @param <T>        the type of the class
      */
     public <T> LibraryLoader(@NotNull File dataFolder) {
-        classLoaderAccess = new ClassLoaderAccess(this.getClass().getClassLoader());
+        this.classLoaderAccess = new ClassLoaderAccess(this.getClass().getClassLoader());
         this.logger = Logger.getLogger(this.getClass().getSimpleName());
         this.dataFolder = dataFolder;
     }
@@ -249,10 +249,10 @@ public final class LibraryLoader {
         }
 
         try {
-            if (pathCheck & (classLoaderAccess.contains(saveLocation.toURI().toURL()) | classLoaderAccess.contains(d))) {
+            if (pathCheck & (this.classLoaderAccess.contains(saveLocation.toURI().toURL()) | this.classLoaderAccess.contains(d))) {
                 throw new InvalidDependencyException("Dependency " + d + " is already in the class path.");
             }
-            classLoaderAccess.add(saveLocation.toURI().toURL());
+            this.classLoaderAccess.add(saveLocation.toURI().toURL());
         } catch (Exception e) {
             throw new InvalidDependencyException("Unable to load '" + saveLocation + "' dependency.", e);
         }
@@ -302,7 +302,7 @@ public final class LibraryLoader {
         }
 
         try {
-            classLoaderAccess.remove(saveLocation.toURI().toURL());
+            this.classLoaderAccess.remove(saveLocation.toURI().toURL());
         } catch (Exception e) {
             throw new InvalidDependencyException("Unable to unload dependency " + d, e);
         }
