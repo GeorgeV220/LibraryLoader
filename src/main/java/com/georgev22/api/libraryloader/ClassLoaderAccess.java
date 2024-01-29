@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  * Provides access to {@link ClassLoader} to add URLs on runtime.
  *
  * <p>Edited by <a href="https://github.com/GeorgeV220">GeorgeV22</a> to work with {@link ClassLoader}</p>
- * <p></p>
+ * <p>
  * Original class: <a href="https://github.com/lucko/helper/blob/master/helper/src/main/java/me/lucko/helper/maven/URLClassLoaderAccess.java">https://github.com/lucko/helper/blob/master/helper/src/main/java/me/lucko/helper/maven/URLClassLoaderAccess.java</a>
  */
 public class ClassLoaderAccess {
@@ -167,6 +167,7 @@ public class ClassLoaderAccess {
      *
      * @param dependency Dependency to check
      * @return if the dependency is present to the unopenedURLs or pathURLs.
+     * @throws URISyntaxException if the dependency is invalid@
      */
     public boolean contains(LibraryLoader.@NotNull Dependency dependency) throws URISyntaxException {
         return contains(dependency, unopenedURLs) | contains(dependency, pathURLs);
