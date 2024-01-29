@@ -209,20 +209,20 @@ public final class LibraryLoader {
      */
     public void load(@NotNull Dependency d, boolean pathCheck) throws InvalidDependencyException, UnknownDependencyException {
         if (dependencyList.contains(d)) {
-            logger.warning(String.format("Dependency %s:%s:%s is already loaded!", d.groupId(), d.artifactId(), d.version()));
+            logger.warning(String.format("Dependency %s:%s:%s is already loaded!", d.groupId, d.artifactId, d.version));
             return;
         }
 
-        logger.info(String.format("Loading dependency %s:%s:%s from %s", d.groupId(), d.artifactId(), d.version(), d.repoUrl()));
+        logger.info(String.format("Loading dependency %s:%s:%s from %s", d.groupId, d.artifactId, d.version, d.repoUrl));
 
-        String name = d.artifactId() + "-" + d.version();
+        String name = d.artifactId + "-" + d.version;
 
-        File saveLocationDir = new File(getLibFolder(), d.groupId().replace(".", File.separator) + File.separator + d.artifactId().replace(".", File.separator) + File.separator + d.version());
+        File saveLocationDir = new File(getLibFolder(), d.groupId.replace(".", File.separator) + File.separator + d.artifactId.replace(".", File.separator) + File.separator + d.version);
 
         if (!saveLocationDir.exists()) {
-            logger.info(String.format("Creating directory for dependency %s:%s:%s from %s", d.groupId(), d.artifactId(), d.version(), d.repoUrl()));
+            logger.info(String.format("Creating directory for dependency %s:%s:%s from %s", d.groupId, d.artifactId, d.version, d.repoUrl));
             if (saveLocationDir.mkdirs()) {
-                logger.info(String.format("The directory for dependency %s:%s:%s was successfully created!!", d.groupId(), d.artifactId(), d.version()));
+                logger.info(String.format("The directory for dependency %s:%s:%s was successfully created!!", d.groupId, d.artifactId, d.version));
             }
         }
 
@@ -281,19 +281,19 @@ public final class LibraryLoader {
      */
     public void unload(Dependency d) throws InvalidDependencyException {
         if (!dependencyList.contains(d)) {
-            logger.warning(String.format("Dependency %s:%s:%s is not loaded!", d.groupId(), d.artifactId(), d.version()));
+            logger.warning(String.format("Dependency %s:%s:%s is not loaded!", d.groupId, d.artifactId, d.version));
             return;
         }
 
-        logger.info(String.format("Unloading dependency %s:%s:%s", d.groupId(), d.artifactId(), d.version()));
+        logger.info(String.format("Unloading dependency %s:%s:%s", d.groupId, d.artifactId, d.version));
 
 
-        String name = d.artifactId() + "-" + d.version();
+        String name = d.artifactId + "-" + d.version;
 
-        File saveLocationDir = new File(getLibFolder(), d.groupId().replace(".", File.separator) + File.separator + d.artifactId().replace(".", File.separator) + File.separator + d.version());
+        File saveLocationDir = new File(getLibFolder(), d.groupId.replace(".", File.separator) + File.separator + d.artifactId.replace(".", File.separator) + File.separator + d.version);
 
         if (!saveLocationDir.exists()) {
-            throw new InvalidDependencyException(String.format("The directory for dependency %s:%s:%s does not exists!!", d.groupId(), d.artifactId(), d.version()));
+            throw new InvalidDependencyException(String.format("The directory for dependency %s:%s:%s does not exists!!", d.groupId, d.artifactId, d.version));
         }
 
         File saveLocation = new File(saveLocationDir, name + ".jar");
@@ -307,7 +307,7 @@ public final class LibraryLoader {
             throw new InvalidDependencyException("Unable to unload dependency " + d, e);
         }
 
-        logger.info(String.format("Unloaded dependency %s:%s:%s successfully", d.groupId(), d.artifactId(), d.version()));
+        logger.info(String.format("Unloaded dependency %s:%s:%s successfully", d.groupId, d.artifactId, d.version));
         dependencyList.remove(d);
     }
 
@@ -338,7 +338,12 @@ public final class LibraryLoader {
      * Represents a dependency with the specified group ID, artifact ID, version, and repository URL.
      */
     @NotNull
-    public record Dependency(String groupId, String artifactId, String version, String repoUrl) {
+    public static class Dependency {
+
+        public final String groupId;
+        public final String artifactId;
+        public final String version;
+        public final String repoUrl;
 
         /**
          * Constructs a new Dependency with the given group ID, artifact ID, version, and repository URL.
@@ -382,7 +387,8 @@ public final class LibraryLoader {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof Dependency that)) return false;
+            if (!(o instanceof Dependency)) return false;
+            Dependency that = (Dependency) o;
             return groupId.equals(that.groupId) && artifactId.equals(that.artifactId) && version.equals(that.version) && repoUrl.equals(that.repoUrl);
         }
 
@@ -394,10 +400,10 @@ public final class LibraryLoader {
         @Override
         public @NotNull String toString() {
             return "LibraryLoader.Dependency(" +
-                    "groupId=" + this.groupId() + ", " +
-                    "artifactId=" + this.artifactId() + ", " +
-                    "version=" + this.version() + ", " +
-                    "repoUrl=" + this.repoUrl() + ")";
+                    "groupId=" + this.groupId + ", " +
+                    "artifactId=" + this.artifactId + ", " +
+                    "version=" + this.version + ", " +
+                    "repoUrl=" + this.repoUrl + ")";
         }
 
         /**
