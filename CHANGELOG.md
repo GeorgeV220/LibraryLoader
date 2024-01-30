@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.9.0...v1.10.0) (2024-01-30)
+
+
+### Features
+
+* add support for resolving snapshot versions from Maven metadata ([36e9bc8](https://github.com/GeorgeV220/LibraryLoader/commit/36e9bc8b96dcacfd72565e6730e175842ddc28d5))
+
 # [1.9.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.8.0...v1.9.0) (2024-01-29)
 
 
