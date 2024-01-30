@@ -33,7 +33,12 @@ import me.lucko.jarrelocator.Relocation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -400,10 +405,10 @@ public final class LibraryLoader {
         }
 
         /**
-         * Returns the URL of the dependency based on the group ID, artifact ID, version, and repository URL.
+         * Retrieves the URL for the artifact in a Maven repository based on the provided information.
          *
-         * @return the URL of the dependency
-         * @throws MalformedURLException if the URL is malformed
+         * @return A new {@link URL} representing the artifact's location.
+         * @throws MalformedURLException If the URL cannot be constructed due to malformed input.
          */
         @Contract(" -> new")
         public @NotNull URL url() throws MalformedURLException {
@@ -411,10 +416,48 @@ public final class LibraryLoader {
             if (!repo.endsWith("/")) {
                 repo += "/";
             }
-            repo += "%s/%s/%s/%s-%s.jar";
+            String metadataUrl = String.format("%s/%s/%s/%s/maven-metadata.xml", repo, this.groupId.replace(".", "/"), this.artifactId, this.version);
 
-            String url = String.format(repo, this.groupId.replace(".", "/"), this.artifactId, this.version, this.artifactId, this.version);
-            return new URL(url);
+            try (InputStream is = new URL(metadataUrl).openStream()) {
+                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                DocumentBuilder db = dbf.newDocumentBuilder();
+                Document doc = db.parse(is);
+
+                NodeList versionNodes = doc.getElementsByTagName("version");
+                if (versionNodes.getLength() > 0) {
+                    Element versionElement = (Element) versionNodes.item(0);
+                    String latestVersion = versionElement.getTextContent();
+
+                    if (latestVersion.endsWith("-SNAPSHOT")) {
+                        NodeList snapshotVersionNodes = doc.getElementsByTagName("snapshotVersion");
+
+                        for (int i = 0; i < snapshotVersionNodes.getLength(); i++) {
+                            Element snapshotVersionElement = (Element) snapshotVersionNodes.item(i);
+                            String extension = snapshotVersionElement.getElementsByTagName("extension").item(0).getTextContent();
+                            if ("jar".equals(extension)) {
+                                String jarValue = snapshotVersionElement.getElementsByTagName("value").item(0).getTextContent();
+
+                                String jarFileName = String.format("%s-%s.jar", this.artifactId, jarValue);
+                                return new URL(String.format("%s/%s/%s/%s/%s", repo, this.groupId.replace(".", "/"), this.artifactId, this.version, jarFileName));
+                            }
+                        }
+                    } else {
+                        String jarFileName = String.format("%s-%s.jar", this.artifactId, latestVersion);
+                        return new URL(String.format("%s/%s/%s/%s", repo, this.groupId.replace(".", "/"), this.artifactId, jarFileName));
+                    }
+                }
+            } catch (Exception e) {
+                try {
+                    repo += "%s/%s/%s/%s-%s.jar";
+
+                    String url = String.format(repo, this.groupId.replace(".", "/"), this.artifactId, this.version, this.artifactId, this.version);
+                    return new URL(url);
+                } catch (Exception ignored) {
+                    throw new RuntimeException("Unable to determine correct URL from Maven repository metadata.", e);
+                }
+            }
+
+            throw new MalformedURLException("Unable to determine correct URL from Maven repository metadata.");
         }
 
         /**
