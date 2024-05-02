@@ -35,13 +35,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -89,9 +93,8 @@ public final class LibraryLoader {
      * @param classLoader the class loader to use for loading libraries
      * @param dataFolder  the folder where the libraries are stored
      * @param logger      the logger for logging messages
-     * @param <T>         the type of the class
      */
-    public <T> LibraryLoader(@NotNull URLClassLoader classLoader,
+    public LibraryLoader(@NotNull URLClassLoader classLoader,
                              @NotNull File dataFolder, @NotNull Logger logger) {
         this.classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.classLoaderAccess.registerLogger(logger);
@@ -105,9 +108,8 @@ public final class LibraryLoader {
      * @param classLoader the class loader to use for loading libraries
      * @param dataFolder  the folder where the libraries are stored
      * @param logger      the logger for logging messages
-     * @param <T>         the type of the class
      */
-    public <T> LibraryLoader(@NotNull ClassLoader classLoader,
+    public LibraryLoader(@NotNull ClassLoader classLoader,
                              @NotNull File dataFolder, @NotNull Logger logger) {
         this.classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.classLoaderAccess.registerLogger(logger);
@@ -121,9 +123,8 @@ public final class LibraryLoader {
      *
      * @param classLoader the class loader to use for loading libraries
      * @param dataFolder  the folder where the libraries are stored
-     * @param <T>         the type of the class
      */
-    public <T> LibraryLoader(@NotNull URLClassLoader classLoader, @NotNull File dataFolder) {
+    public LibraryLoader(@NotNull URLClassLoader classLoader, @NotNull File dataFolder) {
         this.classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.logger = Logger.getLogger(this.getClass().getSimpleName());
         this.classLoaderAccess.registerLogger(this.logger);
@@ -136,9 +137,8 @@ public final class LibraryLoader {
      *
      * @param classLoader the class loader to use for loading libraries
      * @param dataFolder  the folder where the libraries are stored
-     * @param <T>         the type of the class
      */
-    public <T> LibraryLoader(@NotNull ClassLoader classLoader, @NotNull File dataFolder) {
+    public LibraryLoader(@NotNull ClassLoader classLoader, @NotNull File dataFolder) {
         this.classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.logger = Logger.getLogger(this.getClass().getSimpleName());
         this.classLoaderAccess.registerLogger(this.logger);
@@ -151,9 +151,8 @@ public final class LibraryLoader {
      * The logger is set to the default logger for the class.
      *
      * @param dataFolder the folder where the libraries are stored
-     * @param <T>        the type of the class
      */
-    public <T> LibraryLoader(@NotNull File dataFolder) {
+    public LibraryLoader(@NotNull File dataFolder) {
         this.classLoaderAccess = new ClassLoaderAccess(this.getClass().getClassLoader());
         this.logger = Logger.getLogger(this.getClass().getSimpleName());
         this.classLoaderAccess.registerLogger(this.logger);
@@ -307,6 +306,44 @@ public final class LibraryLoader {
 
         logger.info("Loaded dependency '" + name + "' successfully.");
         dependencyList.add(d);
+
+        if (d.hasPom()) {
+            try {
+                List<Dependency> transitiveDependencies = parsePomDependencies(d, d.repoUrl);
+
+                for (Dependency transitiveDependency : transitiveDependencies) {
+                    load(transitiveDependency, pathCheck);
+                }
+            } catch (IOException | SAXException | ParserConfigurationException e) {
+                logger.warning("Failed to parse pom for dependency " + d);
+            }
+        }
+    }
+
+    private @NotNull List<Dependency> parsePomDependencies(@NotNull Dependency d, String repository) throws IOException, SAXException, ParserConfigurationException {
+        List<Dependency> dependencies = new ArrayList<>();
+
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(d.getPomUrl().openStream());
+        doc.getDocumentElement().normalize();
+
+        NodeList dependencyNodes = doc.getElementsByTagName("dependency");
+        for (int i = 0; i < dependencyNodes.getLength(); i++) {
+            Node dependencyNode = dependencyNodes.item(i);
+            if (dependencyNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element dependencyElement = (Element) dependencyNode;
+                String groupId = dependencyElement.getElementsByTagName("groupId").item(0).getTextContent();
+                String artifactId = dependencyElement.getElementsByTagName("artifactId").item(0).getTextContent();
+                String version = dependencyElement.getElementsByTagName("version").item(0).getTextContent();
+
+                Dependency transitiveDependency = new Dependency(groupId, artifactId, version, repository);
+
+                dependencies.add(transitiveDependency);
+            }
+        }
+
+        return dependencies;
     }
 
     /**
@@ -462,6 +499,37 @@ public final class LibraryLoader {
             }
 
             throw new MalformedURLException("Unable to determine correct URL from Maven repository metadata.");
+        }
+
+        /**
+         * Checks if a pom exists for this dependency.
+         *
+         * @return true if a pom exists, false otherwise
+         */
+        public boolean hasPom() {
+            String pomUrl = String.format("%s/%s/%s/%s/%s-%s.pom",
+                    this.repoUrl, this.groupId.replace(".", "/"),
+                    this.artifactId, this.version, this.artifactId, this.version);
+            try {
+                HttpURLConnection connection = (HttpURLConnection) new URL(pomUrl).openConnection();
+                connection.setRequestMethod("HEAD");
+                int responseCode = connection.getResponseCode();
+                return responseCode == HttpURLConnection.HTTP_OK;
+            } catch (IOException e) {
+                return false;
+            }
+        }
+
+        /**
+         * Retrieves the URL for the pom of this dependency.
+         *
+         * @return URL of the pom
+         * @throws MalformedURLException if the URL is malformed
+         */
+        public URL getPomUrl() throws MalformedURLException {
+            return new URL(String.format("%s/%s/%s/%s/%s-%s.pom",
+                    this.repoUrl, this.groupId.replace(".", "/"),
+                    this.artifactId, this.version, this.artifactId, this.version));
         }
 
         /**
