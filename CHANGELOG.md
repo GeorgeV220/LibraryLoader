@@ -1,3 +1,15 @@
+# [1.11.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.10.0...v1.11.0) (2024-05-02)
+
+
+### Bug Fixes
+
+* Improve handling of library dependencies loading ([ad7ceaa](https://github.com/GeorgeV220/LibraryLoader/commit/ad7ceaaf3c7dc5a712ef7d100accfd1c7f9dc220))
+
+
+### Features
+
+* Add support for parsing transitive dependencies from pom ([7f521b0](https://github.com/GeorgeV220/LibraryLoader/commit/7f521b026e9b8e987c6e21288451343f6941db24))
+
 # [1.10.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.9.0...v1.10.0) (2024-01-30)
 
 
