@@ -193,7 +193,11 @@ public final class LibraryLoader {
                 load(lib.groupId(), lib.artifactId(), lib.version(), lib.repo().value(), pathCheck);
             else {
                 String[] dependency = lib.value().split(":", 4);
-                load(dependency[0], dependency[1], dependency[2], dependency[3], pathCheck);
+                if (dependency.length < 4) {
+                    load(dependency[0], dependency[1], dependency[2], lib.repo().value(), pathCheck);
+                } else {
+                    load(dependency[0], dependency[1], dependency[2], dependency[3], pathCheck);
+                }
             }
         }
     }
