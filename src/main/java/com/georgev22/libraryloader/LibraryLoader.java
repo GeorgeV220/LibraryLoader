@@ -95,7 +95,7 @@ public final class LibraryLoader {
      * @param logger      the logger for logging messages
      */
     public LibraryLoader(@NotNull URLClassLoader classLoader,
-                             @NotNull File dataFolder, @NotNull Logger logger) {
+                         @NotNull File dataFolder, @NotNull Logger logger) {
         this.classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.classLoaderAccess.registerLogger(logger);
         this.logger = logger;
@@ -110,7 +110,7 @@ public final class LibraryLoader {
      * @param logger      the logger for logging messages
      */
     public LibraryLoader(@NotNull ClassLoader classLoader,
-                             @NotNull File dataFolder, @NotNull Logger logger) {
+                         @NotNull File dataFolder, @NotNull Logger logger) {
         this.classLoaderAccess = new ClassLoaderAccess(classLoader);
         this.classLoaderAccess.registerLogger(logger);
         this.logger = logger;
