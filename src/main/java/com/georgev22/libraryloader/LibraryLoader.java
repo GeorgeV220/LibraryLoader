@@ -333,9 +333,25 @@ public final class LibraryLoader {
             Node dependencyNode = dependencyNodes.item(i);
             if (dependencyNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element dependencyElement = (Element) dependencyNode;
-                String groupId = dependencyElement.getElementsByTagName("groupId").item(0).getTextContent();
-                String artifactId = dependencyElement.getElementsByTagName("artifactId").item(0).getTextContent();
-                String version = dependencyElement.getElementsByTagName("version").item(0).getTextContent();
+                Node groupIdNode = dependencyElement.getElementsByTagName("groupId").item(0);
+                Node artifactIdNode = dependencyElement.getElementsByTagName("artifactId").item(0);
+                Node versionNode = dependencyElement.getElementsByTagName("version").item(0);
+
+                if (groupIdNode == null || artifactIdNode == null || versionNode == null) {
+                    this.logger.warning("Failed to parse pom for dependency " + d);
+                    this.logger.warning("Dependency: " + groupIdNode + ":" + artifactIdNode + ":" + versionNode);
+                    continue;
+                }
+
+                String groupId = groupIdNode.getTextContent();
+                String artifactId = artifactIdNode.getTextContent();
+                String version = versionNode.getTextContent();
+
+                if (groupId == null || artifactId == null || version == null) {
+                    this.logger.warning("Failed to parse pom for dependency " + d);
+                    this.logger.warning("Dependency: " + groupId + ":" + artifactId + ":" + version);
+                    continue;
+                }
 
                 Dependency transitiveDependency = new Dependency(groupId, artifactId, version, repository);
 
