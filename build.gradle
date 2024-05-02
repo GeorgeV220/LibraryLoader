@@ -58,8 +58,8 @@ dependencies {
 
 shadowJar {
     archiveClassifier.set('')
-    relocate 'me.lucko.jarrelocator', 'com.georgev22.api.libraryloader.relocator'
-    relocate 'org.objectweb.asm', 'com.georgev22.api.libraryloader.asm'
+    relocate 'me.lucko.jarrelocator', "${packageName}.relocator"
+    relocate 'org.objectweb.asm', "${packageName}.asm"
 }
 
 tasks.build.dependsOn(shadowJar)

@@ -1,4 +1,4 @@
-package com.georgev22.api.libraryloader;
+package com.georgev22.libraryloader;
 
 import org.jetbrains.annotations.NotNull;
 

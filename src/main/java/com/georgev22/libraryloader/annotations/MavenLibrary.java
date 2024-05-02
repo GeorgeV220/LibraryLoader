@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package com.georgev22.api.libraryloader.annotations;
+package com.georgev22.libraryloader.annotations;
 
 import org.jetbrains.annotations.NotNull;
 

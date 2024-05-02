@@ -1,4 +1,4 @@
-package com.georgev22.api.libraryloader.exceptions;
+package com.georgev22.libraryloader.exceptions;
 
 /**
  * Thrown when attempting to load an invalid Extension file

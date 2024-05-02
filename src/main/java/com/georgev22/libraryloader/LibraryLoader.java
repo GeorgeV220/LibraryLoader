@@ -23,11 +23,11 @@
  *  SOFTWARE.
  */
 
-package com.georgev22.api.libraryloader;
+package com.georgev22.libraryloader;
 
-import com.georgev22.api.libraryloader.annotations.MavenLibrary;
-import com.georgev22.api.libraryloader.exceptions.InvalidDependencyException;
-import com.georgev22.api.libraryloader.exceptions.UnknownDependencyException;
+import com.georgev22.libraryloader.annotations.MavenLibrary;
+import com.georgev22.libraryloader.exceptions.InvalidDependencyException;
+import com.georgev22.libraryloader.exceptions.UnknownDependencyException;
 import me.lucko.jarrelocator.JarRelocator;
 import me.lucko.jarrelocator.Relocation;
 import org.jetbrains.annotations.Contract;

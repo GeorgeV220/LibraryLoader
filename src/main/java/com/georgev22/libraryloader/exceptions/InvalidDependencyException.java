@@ -1,4 +1,4 @@
-package com.georgev22.api.libraryloader.exceptions;
+package com.georgev22.libraryloader.exceptions;
 
 public class InvalidDependencyException extends Exception {
 
