@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.11.0...v1.12.0) (2024-05-02)
+
+
+### Features
+
+* improve dependency parsing ([a938699](https://github.com/GeorgeV220/LibraryLoader/commit/a938699e1ef9fce39ce46cbf8818db8c91518908))
+
 # [1.11.0](https://github.com/GeorgeV220/LibraryLoader/compare/v1.10.0...v1.11.0) (2024-05-02)
 
 
